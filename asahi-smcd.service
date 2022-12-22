@@ -1,0 +1,9 @@
+[Unit]
+Description=asahi-smcd
+
+[Service]
+ExecStart=/usr/bin/asahi-smcd
+ExecStop=echo auto > /sys/class/power_supply/macsmc-battery/charge_behaviour
+
+[Install]
+WantedBy=multi-user.target
