@@ -9,10 +9,8 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <string.h>
-#include <stdbool.h>
 #include <unistd.h>
-
-#define SETPOINT 80
+#include <stdlib.h>
 
 #define MACSMC_BATTERY "/sys/class/power_supply/macsmc-battery"
 #define MACSMC_BATTERY_CAPACITY MACSMC_BATTERY "/capacity"
@@ -41,13 +39,13 @@ int get_capacity(void)
 		return -1;
 	}
 
-	char cap[3] = { 0 };
+	char cap[4] = { 0 };
 	if (!fread(cap, 1, sizeof(cap), file)) {
 		fclose(file);
 		return -1;
 	}
 	fclose(file);
-	return 100 * (cap[0] - '0') + 10 * (cap[1] - '0') + (cap[2] - '0');
+	return strtol(cap, NULL, 10);
 }
 
 enum charge_status get_charge_status(void)
@@ -93,25 +91,30 @@ int set_charge_behavior(enum charge_behavior new)
 	return fclose(file);
 }
 
-int main(void)
+int main(int argc, char const *argv[])
 {
-	bool run = true;
-	while (run) {
+	int charge_level = 80;
+	if (argc > 1) {
+		long level = strtol(argv[1], NULL, 10);
+		if (level > 0 && level <= 100) {
+			charge_level = level;
+		}
+	}
+
+	for (int err = 0; !err; sleep(30)) {
 		const int charge = get_capacity();
 		const enum charge_status status = get_charge_status();
-		if (charge < 0 || status == STATUS_ERROR) {
-			break;
+		if (charge < 0 || charge > 100 || status == STATUS_ERROR) {
+			err = -1;
 		}
-		else if (charge > SETPOINT && status != DISCHARGING) {
-			run = !set_charge_behavior(FORCE_DISCHARGE);
+		else if (charge > charge_level && status != DISCHARGING) {
+			err = set_charge_behavior(FORCE_DISCHARGE);
 		}
-		else if (charge < SETPOINT && status != CHARGING) {
-			run = !set_charge_behavior(AUTO);
+		else if (charge < charge_level && status != CHARGING) {
+			err = set_charge_behavior(AUTO);
 		}
-		else if (charge == SETPOINT && status != NOTCHARGING) {
-			run = !set_charge_behavior(INHIBIT_CHARGE);
+		else if (charge == charge_level && status != NOTCHARGING) {
+			err = set_charge_behavior(INHIBIT_CHARGE);
 		}
-		sleep(30);
 	}
-	return set_charge_behavior(AUTO);
 }
