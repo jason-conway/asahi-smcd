@@ -1,24 +1,32 @@
 # `asahi-smcd`: Optimized Battery Charging in Asahi Linux
 
-`asahi-smcd` finesses sysfs into performing userspace-controlled battery charging optimization, keeping the battery charged to 80% to reduce degradation.
+`asahi-smcd` finesses sysfs into performing userspace-controlled battery charging optimization, keeping the battery charged to 80% (or a level of your chosing) to reduce degradation.
 
 ## Installation
 
-After cloning the repository, simply
+After cloning the repository, simply:
 ```console
 $ sudo make install
 ```
-to build and install `asahi-smcd`, and
+to build and install `asahi-smcd`.
+
+Enable the service with:
 ```console
-$ sudo systemctl start asahi-smcd
-$ sudo systemctl enable asahi-smcd
+$ systemctl enable asahi-smcd@80
 ```
-to start the systemd service.
+where 80 is the desired charge level. Start the service with:
+```console
+$ systemctl start asahi-smcd@80
+```
 
 ## Uninstalling
 
-Use
+To uninstall, stop / disable the service and run
 ```console
 $ sudo make uninstall
 ```
-to cleanly remove `asahi-smcd`.
+
+## Caveats
+
+- Does not function in S0
+- The uninstall target will not remove the service for you

@@ -1,0 +1,9 @@
+[Unit]
+Description = Optimized Battery Charging in Asahi Linux
+
+[Service]
+ExecStart = /usr/bin/asahi-smcd %I
+ExecStop = echo auto > /sys/class/power_supply/macsmc-battery/charge_behaviour
+
+[Install]
+WantedBy = multi-user.target
