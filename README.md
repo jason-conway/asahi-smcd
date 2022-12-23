@@ -14,7 +14,9 @@ Enable the service with:
 ```console
 $ systemctl enable asahi-smcd@80
 ```
-where 80 is the desired charge level. Start the service with:
+where 80 is the desired charge level.
+
+Start the service with:
 ```console
 $ systemctl start asahi-smcd@80
 ```

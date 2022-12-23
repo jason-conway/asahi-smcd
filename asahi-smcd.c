@@ -117,4 +117,5 @@ int main(int argc, char const *argv[])
 			err = set_charge_behavior(INHIBIT_CHARGE);
 		}
 	}
+	return -1;
 }
